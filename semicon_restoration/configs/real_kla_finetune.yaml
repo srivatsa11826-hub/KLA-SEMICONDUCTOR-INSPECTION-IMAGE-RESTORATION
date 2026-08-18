@@ -1,0 +1,73 @@
+seed: 42
+experiment:
+  name: real_kla_finetune_x2
+  output_dir: results
+  weights_dir: weights/real_kla
+
+data:
+  channels: 1
+  train:
+    gt_dir: out/real_data/train/GT
+    noisy_dir: out/real_data/train/NoisyLR
+    gt_patch_size: 128
+    augment: true
+    deterministic_synthetic: false
+  val:
+    gt_dir: out/real_data/val/GT
+    noisy_dir: out/real_data/val/NoisyLR
+    gt_patch_size: null
+    augment: false
+    deterministic_synthetic: true
+  synthetic:
+    scale: 2
+    gaussian_sigma: [0.005, 0.08]
+    speckle_sigma: [0.01, 0.15]
+    interpolation: [bicubic, bilinear]
+    random_order: true
+
+model:
+  name: nafnet
+  img_channel: 1
+  out_channel: 1
+  width: 16
+  middle_blk_num: 2
+  enc_blk_nums: [1, 1, 2]
+  dec_blk_nums: [1, 1, 1]
+  scale: 2
+  dw_expand: 2
+  ffn_expand: 2
+  drop_out_rate: 0.0
+  dual_frequency: true
+
+loss:
+  lambda_charb: 1.0
+  lambda_ssim: 0.5
+  lambda_lpips: 0.0
+  charbonnier_eps: 1.0e-3
+  lpips_net: alex
+  lpips_random_backbone: false
+
+training:
+  epochs: 4
+  batch_size: 16
+  num_workers: 0
+  learning_rate: 1.0e-4
+  min_learning_rate: 1.0e-6
+  weight_decay: 1.0e-4
+  grad_clip_norm: 1.0
+  accumulation_steps: 1
+  amp: false
+  compile: false
+  channels_last: false
+  drop_last: true
+  persistent_workers: false
+  prefetch_factor: 2
+  save_every: 2
+
+validation:
+  every: 1
+  compute_lpips: false
+  score_weights:
+    psnr: 0.1
+    ssim: 1.0
+    lpips: 0.0

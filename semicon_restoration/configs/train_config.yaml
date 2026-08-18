@@ -1,0 +1,74 @@
+seed: 42
+experiment:
+  name: nafnet_kla_x2
+  output_dir: results
+  weights_dir: weights
+
+data:
+  channels: 3
+  train:
+    gt_dir: data/train/GT
+    noisy_dir: data/train/NoisyLR   # Set to null to synthesize NoisyLR from GT.
+    gt_patch_size: 256
+    augment: true
+    deterministic_synthetic: false
+  val:
+    gt_dir: data/val/GT
+    noisy_dir: data/val/NoisyLR     # May also be null for deterministic synthetic validation.
+    gt_patch_size: null
+    augment: false
+    deterministic_synthetic: true
+  synthetic:
+    scale: 2
+    gaussian_sigma: [0.0, 0.08]
+    speckle_sigma: [0.0, 0.12]
+    interpolation: [bicubic, bilinear]
+    random_order: true
+
+model:
+  name: nafnet
+  img_channel: 3
+  out_channel: 3
+  width: 32
+  middle_blk_num: 4
+  enc_blk_nums: [2, 2, 4, 8]
+  dec_blk_nums: [2, 2, 2, 2]
+  scale: 2
+  dw_expand: 2
+  ffn_expand: 2
+  drop_out_rate: 0.0
+  dual_frequency: true
+
+loss:
+  lambda_charb: 1.0
+  lambda_ssim: 0.5
+  lambda_lpips: 0.1
+  charbonnier_eps: 1.0e-3
+  lpips_net: alex
+  lpips_random_backbone: false
+
+training:
+  epochs: 200
+  batch_size: 8
+  num_workers: 8
+  learning_rate: 2.0e-4
+  min_learning_rate: 1.0e-6
+  weight_decay: 1.0e-4
+  grad_clip_norm: 1.0
+  accumulation_steps: 1
+  amp: true
+  compile: false
+  channels_last: true
+  drop_last: true
+  persistent_workers: true
+  prefetch_factor: 2
+  save_every: 10
+
+validation:
+  every: 1
+  compute_lpips: true
+  # Higher is better. LPIPS is subtracted.
+  score_weights:
+    psnr: 0.1
+    ssim: 1.0
+    lpips: 1.0
